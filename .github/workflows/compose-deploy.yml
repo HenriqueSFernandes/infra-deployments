@@ -1,0 +1,56 @@
+name: Deploy Changed Compose Services
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "compose/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@v4
+
+      - name: Install Doppler CLI
+        run: curl -Ls https://cli.doppler.com/install.sh | sh
+
+      - name: Setup Doppler
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: doppler login --token $DOPPLER_TOKEN
+
+      - name: Prepare SSH key
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
+
+      - name: Detect changed compose folders
+        id: changed
+        run: |
+          echo "Detecting changed folders..."
+          changed_folders=$(git diff --name-only ${{ github.sha }} ${{ github.event.before }} | grep '^compose/' | awk -F/ '{print $2}' | sort -u)
+          echo "Changed folders: $changed_folders"
+          echo "folders=$changed_folders" >> $GITHUB_OUTPUT
+
+      - name: Deploy changed services
+        env:
+          REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+          REGISTRY_PASS: ${{ secrets.REGISTRY_PASS }}
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: |
+          for folder in ${{ steps.changed.outputs.folders }}; do
+            if [ -f "compose/$folder/docker-compose.yml" ]; then
+              echo "Deploying $folder..."
+              ssh -i key.pem -o StrictHostKeyChecking=no user@your-server "
+                docker login -u '$REGISTRY_USER' -p '$REGISTRY_PASS' registry.henriquesf.me &&
+                doppler run -- docker compose -f /path/to/compose/$folder/docker-compose.yml pull &&
+                doppler run -- docker compose -f /path/to/compose/$folder/docker-compose.yml up -d
+              "
+            fi
+          done
