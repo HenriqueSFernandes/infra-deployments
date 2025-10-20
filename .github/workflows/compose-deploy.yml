@@ -30,8 +30,9 @@ jobs:
       - name: Detect changed compose folders
         id: changed
         run: |
+          git fetch origin main
           echo "Detecting changed folders..."
-          changed_folders=$(git diff --name-only ${{ github.sha }} ${{ github.event.before }} | grep '^compose/' | awk -F/ '{print $2}' | sort -u)
+          changed_folders=$(git diff --name-only origin/main...HEAD | grep '^compose/' | awk -F/ '{print $2}' | sort -u)
           echo "Changed folders: $changed_folders"
           echo "folders=$changed_folders" >> $GITHUB_OUTPUT
 
