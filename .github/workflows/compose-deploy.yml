@@ -34,7 +34,6 @@ jobs:
           changed_folders=$(git diff --name-only ${{ github.sha }} ${{ github.event.before }} | grep '^compose/' | awk -F/ '{print $2}' | sort -u)
           echo "Changed folders: $changed_folders"
           echo "folders=$changed_folders" >> $GITHUB_OUTPUT
-
       - name: Deploy changed services
         env:
           REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
@@ -45,18 +44,18 @@ jobs:
           for folder in ${{ steps.changed.outputs.folders }}; do
             if [ -f "compose/$folder/docker-compose.yml" ]; then
               echo "Deploying $folder..."
-              ssh -i key.pem -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST bash << 'EOF'
-                set -e
-                # Login to private registry
-                docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS" registry.henriquesf.me
-
-                # Navigate to project folder on server
-                cd /path/to/compose/$folder
-
-                # Pull latest images and redeploy using Doppler
-                doppler run -- docker compose pull
-                doppler run -- docker compose up -d
-EOF
+              ssh -i key.pem -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
+      set -e
+      # Login to private registry
+      docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS" registry.henriquesf.me
+      
+      # Navigate to project folder on server
+      cd /path/to/compose/$folder
+      
+      # Pull latest images and redeploy using Doppler
+      doppler run -- docker compose pull
+      doppler run -- docker compose up -d
+      EOF
             fi
           done
 
