@@ -15,17 +15,10 @@ jobs:
       - name: Checkout infra repo
         uses: actions/checkout@v4
 
-      - name: Install Doppler CLI locally
-        run: |
-          mkdir -p $HOME/bin
-          curl -Ls https://cli.doppler.com/install.sh | sh -s -- --install-dir $HOME/bin
-          echo "$HOME/bin" >> $GITHUB_PATH
-
-
-      - name: Setup Doppler
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-        run: doppler login --token $DOPPLER_TOKEN
+      - name: Setup Doppler CLI
+        uses: dopplerhq/cli-action@v3
+        with:
+          token: ${{ secrets.DOPPLER_TOKEN }}
 
       - name: Prepare SSH key
         env:
@@ -46,15 +39,24 @@ jobs:
         env:
           REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
           REGISTRY_PASS: ${{ secrets.REGISTRY_PASS }}
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
           for folder in ${{ steps.changed.outputs.folders }}; do
             if [ -f "compose/$folder/docker-compose.yml" ]; then
               echo "Deploying $folder..."
-              ssh -i key.pem -o StrictHostKeyChecking=no user@your-server "
-                docker login -u '$REGISTRY_USER' -p '$REGISTRY_PASS' registry.henriquesf.me &&
-                doppler run -- docker compose -f /path/to/compose/$folder/docker-compose.yml pull &&
-                doppler run -- docker compose -f /path/to/compose/$folder/docker-compose.yml up -d
-              "
+              ssh -i key.pem -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST bash << 'EOF'
+                set -e
+                # Login to private registry
+                docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS" registry.henriquesf.me
+
+                # Navigate to project folder on server
+                cd /path/to/compose/$folder
+
+                # Pull latest images and redeploy using Doppler
+                doppler run -- docker compose pull
+                doppler run -- docker compose up -d
+EOF
             fi
           done
+
