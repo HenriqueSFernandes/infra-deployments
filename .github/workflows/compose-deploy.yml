@@ -1,4 +1,4 @@
-name: Deploy Changed Compose Services
+name: Deploy All Compose Services
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "compose/**"
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -27,37 +28,29 @@ jobs:
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
 
-      - name: Detect changed compose folders
-        id: changed
-        run: |
-          git fetch origin main
-          echo "Detecting changed folders..."
-          changed_folders=$(git diff --name-only origin/main...HEAD | grep '^compose/' | awk -F/ '{print $2}' | sort -u)
-          echo "Changed folders: $changed_folders"
-          echo "folders=$changed_folders" >> $GITHUB_OUTPUT
-
-      - name: Deploy changed services
+      - name: Deploy all services
         env:
           REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
           REGISTRY_PASS: ${{ secrets.REGISTRY_PASS }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
-          for folder in ${{ steps.changed.outputs.folders }}; do
-            if [ -f "compose/$folder/docker-compose.yml" ]; then
+          for folder in compose/*; do
+            if [ -f "$folder/docker-compose.yml" ]; then
               echo "Deploying $folder..."
               ssh -i key.pem -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST bash << 'EOF'
-          set -e
-          # Login to private registry
-          docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS" registry.henriquesf.me
+                set -e
+                FOLDER=$(basename "$folder")
+                cd "$REPO_PATH/$FOLDER"
 
-          # Navigate to project folder on server
-          cd /path/to/compose/$folder
+                git fetch origin main
+                git reset --hard origin/main
 
-          # Pull latest images and redeploy using Doppler
-          doppler run -- docker compose pull
-          doppler run -- docker compose up -d
-          EOF
+                docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS" registry.henriquesf.me
+
+                doppler run -- docker compose pull
+                doppler run -- docker compose up -d
+              EOF
             fi
           done
 
