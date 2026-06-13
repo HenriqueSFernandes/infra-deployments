@@ -1,0 +1,7 @@
+flix.henriquesf.me {
+    reverse_proxy 100.85.35.47:7774
+}
+
+jellyfin.henriquesf.me {
+    reverse_proxy 100.85.35.47:8096
+}
