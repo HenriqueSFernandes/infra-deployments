@@ -3,12 +3,18 @@ services:
     container_name: portainer
     image: portainer/portainer-ce:sts
     restart: always
+    networks:
+      - default
+      - caddy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     ports:
       - 9443:9443
       # - 8000:8000  #Edge Agents
+    labels:
+      caddy: portainer.henriquesf.me
+      caddy.reverse_proxy: "{{upstreams 9000}}"
 
 volumes:
   portainer_data:
@@ -19,3 +25,5 @@ networks:
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: "1400"
+  caddy:
+    external: true
