@@ -1,0 +1,16 @@
+# simple doker compose that pulls docker pull harbor.henriquesf.me/impact-sphere/impact-sphere-site@latest and runs it on port 3000
+
+services:
+  impact-sphere-site:
+    image: harbor.henriquesf.me/impact-sphere/impact-sphere-site:latest
+    container_name: impact-sphere-site
+    restart: unless-stopped
+    networks:
+      - caddy
+    labels:
+      caddy: impactsphere.org
+      caddy.reverse_proxy: "{{upstreams 3000}}" 
+
+networks:
+  caddy:
+    external: true
