@@ -227,9 +227,9 @@ services:
       - caddy
     labels:
       caddy: harbor.henriquesf.me
-      caddy.reverse_proxy: "{{upstreams 8080}}"
+      caddy.reverse_proxy: "{{upstreams 80}}"
     ports:
-      - 8080:8080
+      - 80:80
     depends_on:
       - registry
       - core
