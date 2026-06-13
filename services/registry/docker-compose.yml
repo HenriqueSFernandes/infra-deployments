@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  registry:
+    image: registry:2
+    container_name: docker-registry
+    restart: unless-stopped
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - ./data/registry:/var/lib/registry
+    networks:
+      - registry-internal-net
+
+  registry-ui:
+    image: joxit/docker-registry-ui:main
+    container_name: docker-registry-ui
+    restart: unless-stopped
+    environment:
+      - SINGLE_REGISTRY=true
+      - REGISTRY_TITLE=Ricky Registry
+      - DELETE_IMAGES=true
+      - SHOW_CONTENT_DIGEST=true
+      - NGINX_PROXY_PASS_URL=http://registry:5000
+    depends_on:
+      - registry
+    networks:
+      - registry-internal-net
+      - caddy-proxy
+
+networks:
+  registry-internal-net:
+    driver: bridge
+  caddy-proxy:
+    external: true

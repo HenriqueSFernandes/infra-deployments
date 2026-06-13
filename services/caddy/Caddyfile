@@ -1,0 +1,3 @@
+registry.henriquesf.me {
+    reverse_proxy registry-ui:80
+}
