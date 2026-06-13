@@ -54,7 +54,7 @@ services:
     image: goharbor/harbor-registryctl:v2.14.4
     container_name: registryctl
     env_file:
-      - /home/ricky/infra-deployments/services/harbor/common/config/registryctl/env
+      - ./stack.env
     restart: always
     cap_drop:
       - ALL
@@ -96,7 +96,7 @@ services:
     networks:
       harbor:
     env_file:
-      - /home/ricky/infra-deployments/services/harbor/common/config/db/env
+      - ./stack.env
     depends_on:
       - log
     logging:
@@ -109,7 +109,7 @@ services:
     image: goharbor/harbor-core:v2.14.4
     container_name: harbor-core
     env_file:
-      - /home/ricky/infra-deployments/services/harbor/common/config/core/env
+      - ./stack.env
     restart: always
     cap_drop:
       - ALL
@@ -173,7 +173,7 @@ services:
     image: goharbor/harbor-jobservice:v2.14.4
     container_name: harbor-jobservice
     env_file:
-      - /home/ricky/infra-deployments/services/harbor/common/config/jobservice/env
+      - ./stack.env
     restart: always
     cap_drop:
       - ALL
