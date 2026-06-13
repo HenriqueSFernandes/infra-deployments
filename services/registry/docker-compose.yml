@@ -26,10 +26,13 @@ services:
       - registry
     networks:
       - registry-internal-net
-      - caddy-proxy
+      - caddy
+    labels:
+      caddy: registry.henriquesf.me
+      caddy.reverse_proxy: "{{upstreams 80}}"
 
 networks:
   registry-internal-net:
     driver: bridge
-  caddy-proxy:
+  caddy:
     external: true
