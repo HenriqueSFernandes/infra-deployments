@@ -1,27 +1,4 @@
 services:
-  log:
-    image: goharbor/harbor-log:v2.14.4
-    container_name: harbor-log
-    restart: always
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - SETGID
-      - SETUID
-    volumes:
-      - /var/log/harbor/:/var/log/docker/:z
-      - type: bind
-        source: /home/ricky/infra-deployments/services/harbor/common/config/log/logrotate.conf
-        target: /etc/logrotate.d/logrotate.conf
-      - type: bind
-        source: /home/ricky/infra-deployments/services/harbor/common/config/log/rsyslog_docker.conf
-        target: /etc/rsyslog.d/rsyslog_docker.conf
-    ports:
-      - 127.0.0.1:1514:10514
-    networks:
-      - harbor
   registry:
     image: goharbor/registry-photon:v2.14.4
     container_name: registry
@@ -43,13 +20,6 @@ services:
         target: /harbor_cust_cert
     networks:
       - harbor
-    depends_on:
-      - log
-    logging:
-      driver: "syslog"
-      options:
-        syslog-address: "tcp://localhost:1514"
-        tag: "registry"
   registryctl:
     image: goharbor/harbor-registryctl:v2.14.4
     container_name: registryctl
@@ -73,13 +43,6 @@ services:
         target: /harbor_cust_cert
     networks:
       - harbor
-    depends_on:
-      - log
-    logging:
-      driver: "syslog"
-      options:
-        syslog-address: "tcp://localhost:1514"
-        tag: "registryctl"
   postgresql:
     image: goharbor/harbor-db:v2.14.4
     container_name: harbor-db
@@ -97,14 +60,6 @@ services:
       harbor:
     env_file:
       - ./stack.env
-    depends_on:
-      - log
-    logging:
-      driver: "syslog"
-      options:
-        syslog-address: "tcp://localhost:1514"
-        tag: "postgresql"
-    shm_size: '1gb'
   core:
     image: goharbor/harbor-core:v2.14.4
     container_name: harbor-core
@@ -135,15 +90,9 @@ services:
     networks:
       harbor:
     depends_on:
-      - log
       - registry
       - redis
       - postgresql
-    logging:
-      driver: "syslog"
-      options:
-        syslog-address: "tcp://localhost:1514"
-        tag: "core"
   portal:
     image: goharbor/harbor-portal:v2.14.4
     container_name: harbor-portal
@@ -161,13 +110,6 @@ services:
         target: /etc/nginx/nginx.conf
     networks:
       - harbor
-    depends_on:
-      - log
-    logging:
-      driver: "syslog"
-      options:
-        syslog-address: "tcp://localhost:1514"
-        tag: "portal"
 
   jobservice:
     image: goharbor/harbor-jobservice:v2.14.4
@@ -193,11 +135,6 @@ services:
       - harbor
     depends_on:
       - core
-    logging:
-      driver: "syslog"
-      options:
-        syslog-address: "tcp://localhost:1514"
-        tag: "jobservice"
   redis:
     image: goharbor/redis-photon:v2.14.4
     container_name: redis
@@ -212,13 +149,6 @@ services:
       - /data/redis:/var/lib/redis
     networks:
       harbor:
-    depends_on:
-      - log
-    logging:
-      driver: "syslog"
-      options:
-        syslog-address: "tcp://localhost:1514"
-        tag: "redis"
   proxy:
     image: goharbor/nginx-photon:v2.14.4
     container_name: nginx
@@ -247,12 +177,6 @@ services:
       - registry
       - core
       - portal
-      - log
-    logging:
-      driver: "syslog"
-      options:
-        syslog-address: "tcp://localhost:1514"
-        tag: "proxy"
 networks:
   harbor:
     external: false
