@@ -13,10 +13,10 @@ services:
     volumes:
       - /var/log/harbor/:/var/log/docker/:z
       - type: bind
-        source: ./common/config/log/logrotate.conf
+        source: /home/ricky/infra-deployments/services/harbor/common/config/log/logrotate.conf
         target: /etc/logrotate.d/logrotate.conf
       - type: bind
-        source: ./common/config/log/rsyslog_docker.conf
+        source: /home/ricky/infra-deployments/services/harbor/common/config/log/rsyslog_docker.conf
         target: /etc/rsyslog.d/rsyslog_docker.conf
     ports:
       - 127.0.0.1:1514:10514
@@ -34,12 +34,12 @@ services:
       - SETUID
     volumes:
       - /data/registry:/storage:z
-      - ./common/config/registry/:/etc/registry/:z
+      - /home/ricky/infra-deployments/services/harbor/common/config/registry/:/etc/registry/:z
       - type: bind
         source: /data/secret/registry/root.crt
         target: /etc/registry/root.crt
       - type: bind
-        source: ./common/config/shared/trust-certificates
+        source: /home/ricky/infra-deployments/services/harbor/common/config/shared/trust-certificates
         target: /harbor_cust_cert
     networks:
       - harbor
@@ -54,7 +54,7 @@ services:
     image: goharbor/harbor-registryctl:v2.14.4
     container_name: registryctl
     env_file:
-      - ./common/config/registryctl/env
+      - /home/ricky/infra-deployments/services/harbor/common/config/registryctl/env
     restart: always
     cap_drop:
       - ALL
@@ -64,12 +64,12 @@ services:
       - SETUID
     volumes:
       - /data/registry:/storage:z
-      - ./common/config/registry/:/etc/registry/:z
+      - /home/ricky/infra-deployments/services/harbor/common/config/registry/:/etc/registry/:z
       - type: bind
-        source: ./common/config/registryctl/config.yml
+        source: /home/ricky/infra-deployments/services/harbor/common/config/registryctl/config.yml
         target: /etc/registryctl/config.yml
       - type: bind
-        source: ./common/config/shared/trust-certificates
+        source: /home/ricky/infra-deployments/services/harbor/common/config/shared/trust-certificates
         target: /harbor_cust_cert
     networks:
       - harbor
@@ -96,7 +96,7 @@ services:
     networks:
       harbor:
     env_file:
-      - ./common/config/db/env
+      - /home/ricky/infra-deployments/services/harbor/common/config/db/env
     depends_on:
       - log
     logging:
@@ -109,7 +109,7 @@ services:
     image: goharbor/harbor-core:v2.14.4
     container_name: harbor-core
     env_file:
-      - ./common/config/core/env
+      - /home/ricky/infra-deployments/services/harbor/common/config/core/env
     restart: always
     cap_drop:
       - ALL
@@ -119,9 +119,9 @@ services:
     volumes:
       - /data/ca_download/:/etc/core/ca/:z
       - /data/:/data/:z
-      - ./common/config/core/certificates/:/etc/core/certificates/:z
+      - /home/ricky/infra-deployments/services/harbor/common/config/core/certificates/:/etc/core/certificates/:z
       - type: bind
-        source: ./common/config/core/app.conf
+        source: /home/ricky/infra-deployments/services/harbor/common/config/core/app.conf
         target: /etc/core/app.conf
       - type: bind
         source: /data/secret/core/private_key.pem
@@ -130,7 +130,7 @@ services:
         source: /data/secret/keys/secretkey
         target: /etc/core/key
       - type: bind
-        source: ./common/config/shared/trust-certificates
+        source: /home/ricky/infra-deployments/services/harbor/common/config/shared/trust-certificates
         target: /harbor_cust_cert
     networks:
       harbor:
@@ -157,7 +157,7 @@ services:
       - NET_BIND_SERVICE
     volumes:
       - type: bind
-        source: ./common/config/portal/nginx.conf
+        source: /home/ricky/infra-deployments/services/harbor/common/config/portal/nginx.conf
         target: /etc/nginx/nginx.conf
     networks:
       - harbor
@@ -173,7 +173,7 @@ services:
     image: goharbor/harbor-jobservice:v2.14.4
     container_name: harbor-jobservice
     env_file:
-      - ./common/config/jobservice/env
+      - /home/ricky/infra-deployments/services/harbor/common/config/jobservice/env
     restart: always
     cap_drop:
       - ALL
@@ -184,10 +184,10 @@ services:
     volumes:
       - /data/job_logs:/var/log/jobs:z
       - type: bind
-        source: ./common/config/jobservice/config.yml
+        source: /home/ricky/infra-deployments/services/harbor/common/config/jobservice/config.yml
         target: /etc/jobservice/config.yml
       - type: bind
-        source: ./common/config/shared/trust-certificates
+        source: /home/ricky/infra-deployments/services/harbor/common/config/shared/trust-certificates
         target: /harbor_cust_cert
     networks:
       - harbor
@@ -231,9 +231,9 @@ services:
       - SETUID
       - NET_BIND_SERVICE
     volumes:
-      - ./common/config/nginx:/etc/nginx:z
+      - /home/ricky/infra-deployments/services/harbor/common/config/nginx:/etc/nginx:z
       - type: bind
-        source: ./common/config/shared/trust-certificates
+        source: /home/ricky/infra-deployments/services/harbor/common/config/shared/trust-certificates
         target: /harbor_cust_cert
     networks:
       - harbor
