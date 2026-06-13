@@ -1,3 +1,6 @@
 flix.henriquesf.me {
     reverse_proxy 100.85.35.47:8096
 }
+seerr.henriquesf.me {
+    reverse_proxy 100.85.35.47:5055
+}

@@ -7,11 +7,12 @@ services:
       - 443:443/udp
     environment:
       - CADDY_INGRESS_NETWORKS=caddy
-      - CADDY_DOCKER_CADDYFILE_PATH=/home/ricky/infra-deployments/services/caddy/Caddyfile
+      - CADDY_DOCKER_CADDYFILE_PATH=/etc/caddy_config/Caddyfile
     networks:
       - caddy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /home/ricky/infra-deployments/services/caddy:/etc/caddy_config:ro
       - caddy_data:/data
     restart: unless-stopped
 
