@@ -7,6 +7,7 @@ services:
       - 443:443/udp
     environment:
       - CADDY_INGRESS_NETWORKS=caddy
+      - CADDY_DOCKER_CADDYFILE_PATH=/home/ricky/infra-deployments/services/caddy/Caddyfile
     networks:
       - caddy
     volumes:
