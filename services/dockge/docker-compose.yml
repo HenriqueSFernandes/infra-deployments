@@ -1,0 +1,24 @@
+services:
+  dockge:
+    image: louislam/dockge:1
+    restart: unless-stopped
+    ports:
+      - 5001:5001
+    networks:
+      - caddy
+    labels:
+      caddy: dockge.henriquesf.me
+      caddy.reverse_proxy: "{{upstreams 5001}}"
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dockge_data:/app/data
+      - /home/ricky/infra-deployments/services:/home/ricky/infra-deployments/services
+    environment:
+      - DOCKGE_STACKS_DIR=/home/ricky/infra-deployments/services
+volumes:
+  dockge_data:
+    driver: local
+networks:
+  caddy:
+    external: true
