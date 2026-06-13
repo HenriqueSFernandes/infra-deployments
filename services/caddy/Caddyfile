@@ -1,3 +1,7 @@
 registry.henriquesf.me {
     reverse_proxy registry-ui:80
 }
+
+portainer.henriquesf.me {
+  reverse_proxy portainer:9443
+}
