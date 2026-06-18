@@ -1,0 +1,23 @@
+services:
+  impact-sphere-site:
+    image: harbor.henriquesf.me/populi/populi:latest
+    container_name: populi
+    restart: unless-stopped
+    networks:
+      - caddy
+      - postgres_network
+    labels:
+      caddy: populi.henriquesf.me
+      caddy.reverse_proxy: "{{upstreams 3000}}" 
+    environment:
+      - CHAT_RATE_LIMIT_REQUESTS=${CHAT_RATE_LIMIT_REQUESTS}
+      - CHAT_RATE_LIMIT_WINDOW_MS=${CHAT_RATE_LIMIT_WINDOW_MS}
+      - DATABASE_URL=${DATABASE_URL}
+      - OPENCODE_GO_API_KEY=${OPENCODE_GO_API_KEY}
+
+networks:
+  postgres_network:
+    external: true
+  caddy:
+    external: true
+

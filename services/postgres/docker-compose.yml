@@ -33,6 +33,7 @@ services:
 
 networks:
   postgres:
+    name: postgres_network
     driver: bridge
 
 volumes:
